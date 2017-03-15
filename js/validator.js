@@ -211,7 +211,16 @@
       }
     }, this))
 
-    if (!errors.length && getValue($el) && $el.attr('data-remote')) {
+    if (!errors.length && $el.attr('data-async-validate') in this.validators) {
+      var f = this.validators[$el.attr('data-async-validate')]
+      this.defer($el, function () {
+        f($el, function(ok) {
+          if (!ok) errors.push(getErrorMessage('async-validate') || 'Error')
+          deferred.resolve(errors)
+        });
+      });
+    }
+    else if (!errors.length && getValue($el) && $el.attr('data-remote')) {
       this.defer($el, function () {
         var data = {}
         data[$el.attr('name')] = getValue($el)
